@@ -1,0 +1,46 @@
+#!/usr/bin/env python 
+#-*- coding:utf-8 -*- 
+
+import sys
+from lib import options
+
+#Prints program usage with all possible arguments
+def printUsage():
+    print 'USAGE: ./servicenow-cli [insert|get] [incident] [parameters]'
+
+
+#Main
+if __name__ == '__main__':
+
+    #No arguments? Print usage
+    if len(sys.argv) == 1:
+        printUsage()
+        sys.exit(-1)
+
+    #Checking number of arguments
+    elif len(sys.argv) < 3:
+        print 'Invalid number of arguments'
+        printUsage()
+        sys.exit(-1)
+
+    #Checking if first argument is a valid option
+    if (sys.argv[1] in options.options.keys()):
+        #Checking if second argument is a valid option
+        if (sys.argv[2] in options.options[sys.argv[1]].keys()):
+            #It is, executing desired operation
+            do_evaluate_option = options.options[sys.argv[1]][sys.argv[2]]
+        else:
+            #2nd argument invalid, exiting
+            print "Invalid second argument: %s" % sys.argv[2]
+            printUsage()
+            sys.exit(-1)
+    else:
+        #1st argument invalid, exiting
+        print "Invalid fist argument: %s" % sys.argv[1]
+        printUsage()
+        sys.exit(-1)
+
+    #Executing desired use case
+    do_evaluate_option(sys.argv[3])
+
+    sys.exit(0)

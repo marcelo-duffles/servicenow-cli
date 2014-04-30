@@ -1,0 +1,7 @@
+*.pyc
+.project
+.pydevproject
+.settings
+build
+dist
+conf/servicenow_conf.py
