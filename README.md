@@ -1,4 +1,11 @@
-Service Now Command-line interface
+Service Now Command-Line Interface
 ====================================
 
-Under development
+USAGE:
+- Run `./servicenow-cli -h` to see usage options
+- Before running, edit the configuration file `conf/servicenow_conf.py`
+- Example:
+  `./servicenow-cli insert incident my_server`
+
+BUILD:
+- `pyinstaller servicenow-cli.spec`
