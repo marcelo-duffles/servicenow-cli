@@ -1,3 +1,4 @@
+- generate Windows executable
 - log messages
 - handle API errors
 - improve the way of inputting data
