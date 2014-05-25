@@ -1,12 +1,12 @@
-#!/usr/bin/env python 
-#-*- coding:utf-8 -*- 
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
 
 import sys
 from lib import options
 
 #Prints program usage with all possible arguments
 def printUsage():
-    print 'USAGE: ./servicenow-cli [insert|get] [incident] [parameters]'
+    print 'USAGE: ./servicenow-cli [insert|get] [incident|ci] [parameters]'
 
 
 #Main
