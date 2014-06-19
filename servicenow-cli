@@ -6,7 +6,7 @@ from lib import options
 
 #Prints program usage with all possible arguments
 def printUsage():
-    print 'USAGE: ./servicenow-cli [insert|get] [incident|ci] [parameters]'
+    print 'USAGE: ./servicenow-cli [insert|get] [incident|alert_event|ci] [parameters]'
 
 
 #Main
