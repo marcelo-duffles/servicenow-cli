@@ -25,11 +25,11 @@ def build_session(resource):
     try:
         session = SOAPProxy(proxy, namespace)
 
-        # uncomment these for LOTS of debugging output
-        # session.config.dumpHeadersIn = 1
-        # session.config.dumpHeadersOut = 1
-        # session.config.dumpSOAPOut = 1
-        # session.config.dumpSOAPIn = 1
+        if (servicenow_conf.SOAP_API_DEBUG == True):
+            session.config.dumpHeadersIn = 1
+            session.config.dumpHeadersOut = 1
+            session.config.dumpSOAPOut = 1
+            session.config.dumpSOAPIn = 1
 
         return session
     except Exception, e:
