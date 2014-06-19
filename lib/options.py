@@ -45,10 +45,10 @@ def handle_insert_incident(parameters):
     """ See https://yourinstance.service-now.com/incident.do?WSDL """
     """ for available values """
     response = session.insert(
-        cmdb_ci='.'.join(parameters.split()[0].split('.')[0:2]),
-        opm_severity=parameters.split()[1],
-        opm_entity=parameters.split()[2],
-        short_description=' '.join(parameters.split()[3:])
+        cmdb_ci='.'.join(parameters.split(';')[0].split('.')[0:2]),
+        u_opm_severity=parameters.split(';')[1],
+        u_opm_entity=parameters.split(';')[2],
+        short_description=' '.join(parameters.split(';')[3:])
     )
     print response
 
@@ -58,10 +58,10 @@ def handle_insert_alert_event(parameters):
     """ See https://yourinstance.service-now.com/u_alert_event.do?WSDL """
     """ for available values """
     response = session.insert(
-        cmdb_ci='.'.join(parameters.split()[0].split('.')[0:2]),
-        opm_severity=parameters.split()[1],
-        opm_entity=parameters.split()[2],
-        short_description=' '.join(parameters.split()[3:])
+        cmdb_ci='.'.join(parameters.split(';')[0].split('.')[0:2]),
+        u_opm_severity=parameters.split(';')[1],
+        u_opm_entity=parameters.split(';')[2],
+        short_description=''.join(parameters.split(';')[3:])
     )
     print response
 
