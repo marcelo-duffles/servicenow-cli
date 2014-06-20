@@ -35,3 +35,20 @@ def build_session(resource):
     except Exception, e:
         print e
         sys.exit(-1)
+
+
+def insert(resource, data):
+    session = build_session(resource)
+    """ See https://yourinstance.service-now.com/desiredresource.do?WSDL """
+    """ for available values """
+    response = session.insert(**data)
+    return response
+
+
+def get(resource, data):
+    session = build_session(resource)
+    response = session.get(
+        sys_id=session.getKeys(
+            **data).sys_id
+    )
+    return response

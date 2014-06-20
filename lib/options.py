@@ -14,55 +14,50 @@ import soap_api
 
 
 def handle_get_incident(incident_number):
-    session = soap_api.build_session('incident')
-    response = session.get(
-        sys_id=session.getKeys(
-            number=incident_number).sys_id
-    )
+    data = {
+        'number': incident_number
+    }
+    response = soap_api.get('incident', data)
     print response
 
 
 def handle_get_alert_event(alert_event_number):
-    session = soap_api.build_session('u_alert_event')
-    response = session.get(
-        sys_id=session.getKeys(
-            number=alert_event_number).sys_id
-    )
+    data = {
+        'number': alert_event_number
+    }
+    response = soap_api.get('u_alert_event', data)
     print response
 
 
 def handle_get_ci(ci_name):
-    session = soap_api.build_session('cmdb_ci')
-    response = session.get(
-        sys_id=session.getKeys(
-            name=ci_name).sys_id
-    )
+    data = {
+        'name': ci_name
+    }
+    response = soap_api.get('cmdb_ci',data)
     print response
 
 
 def handle_insert_incident(parameters):
-    session = soap_api.build_session('incident')
-    """ See https://yourinstance.service-now.com/incident.do?WSDL """
-    """ for available values """
-    response = session.insert(
-        cmdb_ci='.'.join(parameters.split(';')[0].split('.')[0:2]),
-        u_opm_severity=parameters.split(';')[1],
-        u_opm_entity=parameters.split(';')[2],
-        short_description=' '.join(parameters.split(';')[3:])
-    )
+
+    data = {
+        'cmdb_ci': '.'.join(parameters.split(';')[0].split('.')[0:2]),
+        'u_opm_severity': parameters.split(';')[1],
+        'u_opm_entity': parameters.split(';')[2],
+        'short_description': ''.join(parameters.split(';')[3:])
+    }
+    response = soap_api.insert('incident', data)
     print response
 
 
 def handle_insert_alert_event(parameters):
-    session = soap_api.build_session('u_alert_event')
-    """ See https://yourinstance.service-now.com/u_alert_event.do?WSDL """
-    """ for available values """
-    response = session.insert(
-        cmdb_ci='.'.join(parameters.split(';')[0].split('.')[0:2]),
-        u_opm_severity=parameters.split(';')[1],
-        u_opm_entity=parameters.split(';')[2],
-        short_description=''.join(parameters.split(';')[3:])
-    )
+
+    data = {
+        'cmdb_ci': '.'.join(parameters.split(';')[0].split('.')[0:2]),
+        'u_opm_severity': parameters.split(';')[1],
+        'u_opm_entity': parameters.split(';')[2],
+        'short_description': ''.join(parameters.split(';')[3:])
+    }
+    response = soap_api.insert('u_alert_event', data)
     print response
 
 
