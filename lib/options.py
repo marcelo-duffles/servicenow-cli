@@ -11,6 +11,8 @@ except Exception, e:
     sys.exit(-1)
 
 import soap_api
+import servicenow_conf
+
 
 def parse_parameters(parameters):
     data = {
@@ -20,6 +22,25 @@ def parse_parameters(parameters):
         'short_description': ''.join(parameters.split(';')[3:])
     }
     return data
+
+
+def filter_ci(ci_name):
+    ''' returns False if the CI is to be ignored '''
+    if (servicenow_conf.IGNORE_CI is not None):
+        ci = soap_api.get('cmdb_ci', {'name': ci_name})
+        for k in servicenow_conf.IGNORE_CI.keys():
+            if (servicenow_conf.IGNORE_CI[k] in ci[k]):
+                return False
+    return True
+
+
+def filter_alert_event(event):
+    ''' returns False if the alert event is to be ignored '''
+    if (servicenow_conf.IGNORE_ALERT_EVENT is not None):
+        for k in servicenow_conf.IGNORE_ALERT_EVENT.keys():
+            if (servicenow_conf.IGNORE_ALERT_EVENT[k] in event[k]):
+                return False
+    return True
 
 
 def handle_get_incident(incident_number):
@@ -52,8 +73,12 @@ def handle_insert_incident(parameters):
 
 
 def handle_insert_alert_event(parameters):
-    response = soap_api.insert('u_alert_event', parse_parameters(parameters))
-    print response
+    data = parse_parameters(parameters)
+    if (filter_alert_event(data) and filter_ci(data['cmdb_ci'])):
+        response = soap_api.insert('u_alert_event', data)
+        print response
+    else:
+        print "Event ignored according to configured match conditions."
 
 
 def handle_insert_ci(parameters):
