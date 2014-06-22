@@ -1,14 +1,15 @@
 # !/usr/bin/env python
 # -*- coding:UTF-8 -*-
 
-from SOAPpy import SOAPProxy
 import sys
+from SOAPpy import SOAPProxy
+from src import log
 
 try:
     import __meta__
     sys.path = __meta__.PATHS.values() + sys.path
 except Exception, e:
-    print e
+    log.userMessage.error(e)
     sys.exit(-1)
 
 import servicenow_conf
@@ -25,7 +26,7 @@ def build_session(resource):
     try:
         session = SOAPProxy(proxy, namespace)
 
-        if (servicenow_conf.SOAP_API_DEBUG == True):
+        if (servicenow_conf.SOAP_API_DEBUG):
             session.config.dumpHeadersIn = 1
             session.config.dumpHeadersOut = 1
             session.config.dumpSOAPOut = 1
@@ -33,7 +34,7 @@ def build_session(resource):
 
         return session
     except Exception, e:
-        print e
+        log.userMessage.error(e)
         sys.exit(-1)
 
 
@@ -47,8 +48,12 @@ def insert(resource, data):
 
 def get(resource, data):
     session = build_session(resource)
+
+    resource_keys = session.getKeys(**data)
+    if (resource_keys.sys_id == ''):
+        raise Exception('Object not found in Service Now: %s' % data)
+
     response = session.get(
-        sys_id=session.getKeys(
-            **data).sys_id
+        sys_id=resource_keys.sys_id
     )
     return response

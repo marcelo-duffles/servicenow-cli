@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 import sys
-from lib import options
+from src import options, log
 
 #Prints program usage with all possible arguments
 def printUsage():
@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     #Checking number of arguments
     elif len(sys.argv) < 3:
-        print 'Invalid number of arguments'
+        log.userMessage.error('Invalid number of arguments')
         printUsage()
         sys.exit(-1)
 
@@ -31,12 +31,12 @@ if __name__ == '__main__':
             do_evaluate_option = options.options[sys.argv[1]][sys.argv[2]]
         else:
             #2nd argument invalid, exiting
-            print "Invalid second argument: %s" % sys.argv[2]
+            log.userMessage.error("Invalid second argument: %s" % sys.argv[2])
             printUsage()
             sys.exit(-1)
     else:
         #1st argument invalid, exiting
-        print "Invalid fist argument: %s" % sys.argv[1]
+        log.userMessage.error("Invalid fist argument: %s" % sys.argv[1])
         printUsage()
         sys.exit(-1)
 
