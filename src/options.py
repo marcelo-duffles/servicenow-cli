@@ -2,7 +2,10 @@
 # -*- coding:utf-8 -*-
 
 import sys
+import os
 import traceback
+import json
+import time
 from src import log, soap_api
 
 try:
@@ -107,7 +110,10 @@ def handle_insert_alert_event(parameters):
         except Exception, e:
             log.userMessage.error("Error inserting alert event to \
 Service Now: %s" % e)
-            log.alertEventsNotInserted.info(data)
+            if os.path.exists('alertEventsNotInserted.lock'):
+                log.alertEventsNotInsertedTemp.info(json.dumps(data))
+            else:
+                log.alertEventsNotInserted.info(json.dumps(data))
             log.userMessage.debug(traceback.format_exc())
     else:
         log.userMessage.info("Event ignored according to configured match \
@@ -118,19 +124,103 @@ def handle_insert_ci(parameters):
     log.userMessage.info("Insert CI option yet not implemented.")
 
 
-insert_options = {
-    'incident': handle_insert_incident,
-    'alert_event': handle_insert_alert_event,
-    'ci': handle_insert_ci,
-}
+def handle_reinsert_alert_event():
+    if os.path.exists('alertEventsReinsertion.lock'):
+        log.userMessage.info('Aborting, because the file \
+alertEventsReinsertion.lock already exists, and hence another reinsertion is \
+already in place.')
+        sys.exit(0)
 
-get_options = {
-    'incident': handle_get_incident,
-    'alert_event': handle_get_alert_event,
-    'ci': handle_get_ci,
-}
+    # When the alertEventsReinsertion.lock file exists, other processes can't
+    # simultaneously start another reinsertion process
+    reinsertion_lock_file = open('alertEventsReinsertion.lock', 'w')
+    reinsertion_lock_file.close()
+    log.userMessage.debug('alertEventsReinsertion lock acquired.')
+
+    # When the alertEventsNotInserted.lock file exists, other processes know
+    # that they have to write temporarily to the temp file
+    events_lock_file = open('alertEventsNotInserted.lock', 'w')
+    events_lock_file.close()
+    log.userMessage.debug('alertEventsNotInserted lock acquired.')
+
+    log.userMessage.info('Waiting 10s for the completion of ongoing writes to \
+the primary file (alertEventsNotInserted.log)...')
+    time.sleep(10)
+    primary_file = open('alertEventsNotInserted.log', 'r')
+
+    for line in primary_file:
+        originalTime = ' '.join(line.split(' ', 2)[0:2])
+        data = json.loads(line.split(' ', 2)[2].rstrip('\n'))
+        log.userMessage.debug("Alert event read from log file: %s %s" %
+                              (originalTime, data))
+        data['description'] = "Event originally generated at %s. \
+t hasn\'t been inserted earlier due to an error with Service Now \
+PI call." % originalTime
+        try:
+            response = soap_api.insert('u_alert_event', data)
+            log.userMessage.info('Alert event reinserted: %s' % response)
+        except Exception, e:
+            log.userMessage.error("Error reinserting alert event to \
+Service Now: %s" % e)
+            log.pastAlertEventsTemp.info(line.rstrip('\n'))
+            log.userMessage.debug(traceback.format_exc())
+
+    primary_file.close()
+
+    # At this point, the primary file can be removed, since we have already
+    # reinserted all of its events
+    os.remove('alertEventsNotInserted.log')
+    log.userMessage.debug('alertEventsNotInserted.log removed.')
+
+    # When the alertEventsNotInserted.lock file is removed, other processes
+    # know that they have to  write back to the primary file, rather than
+    # continuing to write to the temp file
+    os.remove('alertEventsNotInserted.lock')
+    log.userMessage.debug('alertEventsNotInserted lock released.')
+
+    log.userMessage.info('Waiting 10s for the completion of ongoing writes to \
+temp file (alertEventsNotInserted.temp)...')
+    time.sleep(10)
+    temp_file = open('alertEventsNotInserted.temp', 'r')
+
+    # Copying temporary alert events to the primary file...
+    primary_file = open('alertEventsNotInserted.log', 'a')
+    for line in temp_file:
+        primary_file.write(line)
+    primary_file.close()
+
+    temp_file.close()
+    os.remove('alertEventsNotInserted.temp')
+    log.userMessage.debug('alertEventsNotInserted.temp removed.')
+
+    # When the alertEventsReinsertion lock file is removed, other processes are
+    # free to start another reinsertion
+    os.remove('alertEventsReinsertion.lock')
+    log.userMessage.debug('alertEventsReinsertion lock released.')
+
+
+def handle_reinsert_incident():
+    log.userMessage.info("Reinsert incident option yet not implemented.")
+
+
+def handle_reinsert_ci():
+    log.userMessage.info("Reinsert CI option yet not implemented.")
+
 
 options = {
-    'insert': insert_options,
-    'get': get_options
+    'insert': {
+        'incident': handle_insert_incident,
+        'alert_event': handle_insert_alert_event,
+        'ci': handle_insert_ci,
+    },
+    'reinsert': {
+        'incident': handle_reinsert_incident,
+        'alert_event': handle_reinsert_alert_event,
+        'ci': handle_reinsert_ci,
+    },
+    'get': {
+        'incident': handle_get_incident,
+        'alert_event': handle_get_alert_event,
+        'ci': handle_get_ci,
+    }
 }

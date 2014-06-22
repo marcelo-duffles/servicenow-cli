@@ -6,7 +6,8 @@ from src import options, log
 
 #Prints program usage with all possible arguments
 def printUsage():
-    print 'USAGE: ./servicenow-cli [insert|get] [incident|alert_event|ci] [parameters]'
+    print 'USAGE: ./servicenow-cli [insert|get|reinsert] \
+[incident|alert_event|ci] (parameters)'
 
 
 #Main
@@ -36,11 +37,14 @@ if __name__ == '__main__':
             sys.exit(-1)
     else:
         #1st argument invalid, exiting
-        log.userMessage.error("Invalid fist argument: %s" % sys.argv[1])
+        log.userMessage.error("Invalid first argument: %s" % sys.argv[1])
         printUsage()
         sys.exit(-1)
 
     #Executing desired use case
-    do_evaluate_option(sys.argv[3])
+    if (sys.argv[1] == 'reinsert'):
+        do_evaluate_option()
+    else:
+        do_evaluate_option(sys.argv[3])
 
     sys.exit(0)

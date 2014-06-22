@@ -35,8 +35,7 @@ def build_session(resource):
 
         return session
     except Exception, e:
-        log.userMessage.error(e)
-        sys.exit(-1)
+        raise Exception('Error creating SOAP session: %s' % e)
 
 
 def insert(resource, data):

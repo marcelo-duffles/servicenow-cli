@@ -6,17 +6,40 @@ formatters:
     format: '%(asctime)s %(levelname)s: %(message)s'
   event:
     format: '%(asctime)s %(message)s'
+  pastEvent:
+    format: '%(message)s'
 handlers:
   console:
     class: logging.StreamHandler
     level: INFO
     formatter: userMessage
     stream: ext://sys.stdout
-  alertEventsNotInsertedFile:
+  alertEventsNotInsertedHandler:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: event
     filename: alertEventsNotInserted.log
+    maxBytes: 8388608 # 8 MBytes
+    backupCount: 0
+  alertEventsNotInsertedTempHandler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: event
+    filename: alertEventsNotInserted.temp
+    maxBytes: 8388608 # 8 MBytes
+    backupCount: 0
+  pastAlertEventsHandler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: pastEvent
+    filename: alertEventsNotInserted.log
+    maxBytes: 8388608 # 8 MBytes
+    backupCount: 0
+  pastAlertEventsTempHandler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: pastEvent
+    filename: alertEventsNotInserted.temp
     maxBytes: 8388608 # 8 MBytes
     backupCount: 0
   debugFile:
@@ -29,7 +52,19 @@ handlers:
 loggers:
   alertEventsNotInserted:
     level: DEBUG
-    handlers: [alertEventsNotInsertedFile]
+    handlers: [alertEventsNotInsertedHandler]
+    propagate: no
+  alertEventsNotInsertedTemp:
+    level: DEBUG
+    handlers: [alertEventsNotInsertedTempHandler]
+    propagate: no
+  pastAlertEvents:
+    level: DEBUG
+    handlers: [pastAlertEventsHandler]
+    propagate: no
+  pastAlertEventsTemp:
+    level: DEBUG
+    handlers: [pastAlertEventsTempHandler]
     propagate: no
 root:
   level: DEBUG
