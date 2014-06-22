@@ -31,11 +31,11 @@ def filter_ci(ci_name):
     if (servicenow_conf.IGNORE_CI is not None):
         try:
             ci = soap_api.get('cmdb_ci', {'name': ci_name})
-            log.userMessage.debug('Got CI inside filter_ci():\n%s' %
-                                  str(ci).split(':', 1)[1].split(' ', 1)[1])
+            log.userMessage.debug('filter_ci(): got CI\n%s' % ci)
         except:
-            log.userMessage.warning("Couldn\'t get CI \"%s\" from Service Now. \
-Skipping filter_ci()." % ci_name)
+            log.userMessage.warning("filter_ci(): couldn\'t get CI \"%s\" from \
+Service Now, so it isn\'t possible to determine whether it matches with \
+configured filtering conditions." % ci_name)
             log.userMessage.debug(traceback.format_exc())
             return True
 
@@ -63,8 +63,7 @@ def handle_get_incident(incident_number):
     }
     try:
         response = soap_api.get('incident', data)
-        log.userMessage.info('Requested incident: %s' %
-                             str(response).split(':', 1)[1].split(' ', 1)[1])
+        log.userMessage.info('Requested incident:\n%s' % response)
     except:
         log.userMessage.error("Error getting incident from Service Now.")
         log.userMessage.debug("Incident: %s" % incident_number)
@@ -77,8 +76,7 @@ def handle_get_alert_event(alert_event_number):
     }
     try:
         response = soap_api.get('u_alert_event', data)
-        log.userMessage.info('Requested alert event: %s' %
-                             str(response).split(':', 1)[1].split(' ', 1)[1])
+        log.userMessage.info('Requested alert event:\n%s' % response)
     except:
         log.userMessage.error("Error getting alert event from Service Now.")
         log.userMessage.debug("Alert event: %s" % alert_event_number)
@@ -91,8 +89,7 @@ def handle_get_ci(ci_name):
     }
     try:
         response = soap_api.get('cmdb_ci', data)
-        log.userMessage.info('Requested CI: %s' %
-                             str(response).split(':', 1)[1].split(' ', 1)[1])
+        log.userMessage.info('Requested CI:\n%s' % response)
     except:
         log.userMessage.error("Error getting CI from Service Now.")
         log.userMessage.debug("CI: %s" % ci_name)
@@ -103,8 +100,7 @@ def handle_insert_incident(parameters):
     data = parse_parameters(parameters)
     try:
         response = soap_api.insert('incident', data)
-        log.userMessage.info('Incident inserted: %s' %
-                             str(response).split(':', 1)[1].split(' ', 1)[1])
+        log.userMessage.info('Incident inserted: %s' % response)
     except:
         log.userMessage.error("Error inserting incident to Service Now.")
         log.userMessage.debug("Incident: %s" % data)
@@ -116,10 +112,7 @@ def handle_insert_alert_event(parameters):
     if (filter_alert_event(data) and filter_ci(data['cmdb_ci'])):
         try:
             response = soap_api.insert('u_alert_event', data)
-            log.userMessage.info(
-                'Alert event inserted: %s' %
-                str(response).split(':', 1)[1].split(' ', 1)[1]
-            )
+            log.userMessage.info('Alert event inserted: %s' % response)
         except Exception, e:
             log.userMessage.error("Error inserting alert event to \
 Service Now: %s" % e)

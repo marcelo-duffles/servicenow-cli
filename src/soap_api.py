@@ -25,6 +25,7 @@ def build_session(resource):
 
     try:
         session = SOAPProxy(proxy, namespace)
+        session.simplify_objects = 1
 
         if (servicenow_conf.SOAP_API_DEBUG):
             session.config.dumpHeadersIn = 1
@@ -50,10 +51,8 @@ def get(resource, data):
     session = build_session(resource)
 
     resource_keys = session.getKeys(**data)
-    if (resource_keys.sys_id == ''):
+    if (resource_keys['sys_id'] == ''):
         raise Exception('Object not found in Service Now: %s' % data)
 
-    response = session.get(
-        sys_id=resource_keys.sys_id
-    )
+    response = session.get(sys_id=resource_keys['sys_id'])
     return response
