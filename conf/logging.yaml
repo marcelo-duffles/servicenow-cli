@@ -5,20 +5,20 @@ formatters:
   debugMessage:
     format: '%(asctime)s %(levelname)s: %(message)s'
   event:
-    format: '%(asctime)s;%(message)s'
+    format: '%(asctime)s %(message)s'
 handlers:
   console:
     class: logging.StreamHandler
     level: INFO
     formatter: userMessage
     stream: ext://sys.stdout
-  eventsFile:
+  alertEventsNotInsertedFile:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
     formatter: event
-    filename: events.log
+    filename: alertEventsNotInserted.log
     maxBytes: 8388608 # 8 MBytes
-    backupCount: 5
+    backupCount: 0
   debugFile:
     class: logging.handlers.RotatingFileHandler
     level: DEBUG
@@ -27,9 +27,9 @@ handlers:
     maxBytes: 8388608 # 8 MBytes
     backupCount: 5
 loggers:
-  events:
+  alertEventsNotInserted:
     level: DEBUG
-    handlers: [eventsFile]
+    handlers: [alertEventsNotInsertedFile]
     propagate: no
 root:
   level: DEBUG

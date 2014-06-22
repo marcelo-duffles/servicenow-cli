@@ -123,7 +123,7 @@ def handle_insert_alert_event(parameters):
         except Exception, e:
             log.userMessage.error("Error inserting alert event to \
 Service Now: %s" % e)
-            log.userMessage.debug("Alert event: %s" % data)
+            log.alertEventsNotInserted.info(data)
             log.userMessage.debug(traceback.format_exc())
     else:
         log.userMessage.info("Event ignored according to configured match \
