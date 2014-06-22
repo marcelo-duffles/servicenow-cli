@@ -15,16 +15,6 @@ except Exception, e:
 import servicenow_conf
 
 
-def parse_parameters(parameters):
-    data = {
-        'cmdb_ci': '.'.join(parameters.split(';')[0].split('.')[0:2]),
-        'u_opm_severity': parameters.split(';')[1],
-        'u_opm_entity': parameters.split(';')[2],
-        'short_description': ''.join(parameters.split(';')[3:])
-    }
-    return data
-
-
 def filter_ci(ci_name):
     ''' returns False if the CI is to be ignored '''
 
@@ -97,7 +87,7 @@ def handle_get_ci(ci_name):
 
 
 def handle_insert_incident(parameters):
-    data = parse_parameters(parameters)
+    data = servicenow_conf.build_incident(parameters)
     try:
         response = soap_api.insert('incident', data)
         log.userMessage.info('Incident inserted: %s' % response)
@@ -108,7 +98,7 @@ def handle_insert_incident(parameters):
 
 
 def handle_insert_alert_event(parameters):
-    data = parse_parameters(parameters)
+    data = servicenow_conf.build_alert_event(parameters)
     if (filter_alert_event(data) and filter_ci(data['cmdb_ci'])):
         try:
             response = soap_api.insert('u_alert_event', data)
