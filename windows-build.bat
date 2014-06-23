@@ -1,2 +1,3 @@
 pyinstaller servicenow-cli.spec
-copy conf\servicenow_conf.py dist\servicenow-cli
+mkdir dist\servicenow-cli\conf
+copy conf\* dist\servicenow-cli\conf
