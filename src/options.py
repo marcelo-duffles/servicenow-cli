@@ -110,7 +110,7 @@ def handle_insert_alert_event(parameters):
         except Exception, e:
             log.userMessage.error("Error inserting alert event to \
 Service Now: %s" % e)
-            if os.path.exists('alertEventsNotInserted.lock'):
+            if os.path.exists(servicenow_conf.ALERT_EVENTS_LOCK):
                 log.alertEventsNotInsertedTemp.info(json.dumps(data))
             else:
                 log.alertEventsNotInserted.info(json.dumps(data))
@@ -125,28 +125,32 @@ def handle_insert_ci(parameters):
 
 
 def handle_reinsert_alert_event():
-    if os.path.exists('alertEventsReinsertion.lock'):
-        log.userMessage.info('Aborting, because the file \
-alertEventsReinsertion.lock already exists, and hence another reinsertion is \
-already in place.')
+    if os.path.exists(servicenow_conf.ALERT_EVENTS_REINSERTION_LOCK):
+        log.userMessage.info(
+            'Aborting, because the file %s already exists, and hence another \
+reinsertion is already in place.' %
+            servicenow_conf.ALERT_EVENTS_REINSERTION_LOCK)
         sys.exit(0)
 
-    # When the alertEventsReinsertion.lock file exists, other processes can't
-    # simultaneously start another reinsertion process
-    reinsertion_lock_file = open('alertEventsReinsertion.lock', 'w')
+    # When the lock file ALERT_EVENT_REINSERTION_LOCK exists, other processes
+    # can't simultaneously start another reinsertion process
+    reinsertion_lock_file = open(servicenow_conf.ALERT_EVENTS_REINSERTION_LOCK,
+                                 'w')
     reinsertion_lock_file.close()
-    log.userMessage.debug('alertEventsReinsertion lock acquired.')
+    log.userMessage.debug('ALERT_EVENTS_REINSERTION_LOCK acquired.')
 
-    # When the alertEventsNotInserted.lock file exists, other processes know
-    # that they have to write temporarily to the temp file
-    events_lock_file = open('alertEventsNotInserted.lock', 'w')
+    # When the ALERT_EVENTS_LOCK file exists, other processes know that they
+    # have to write temporarily to the temp file
+    events_lock_file = open(servicenow_conf.ALERT_EVENTS_LOCK, 'w')
     events_lock_file.close()
-    log.userMessage.debug('alertEventsNotInserted lock acquired.')
+    log.userMessage.debug('ALERT_EVENTS_LOCK acquired.')
 
     log.userMessage.info('Waiting 10s for the completion of ongoing writes to \
-the primary file (alertEventsNotInserted.log)...')
+the primary file...')
     time.sleep(10)
-    primary_file = open('alertEventsNotInserted.log', 'r')
+    PRIMARY_FILENAME = log.logging_conf_dict['handlers'][
+        'alertEventsNotInsertedHandler']['filename']
+    primary_file = open(PRIMARY_FILENAME, 'r')
 
     for line in primary_file:
         originalTime = ' '.join(line.split(' ', 2)[0:2])
@@ -169,34 +173,36 @@ Service Now: %s" % e)
 
     # At this point, the primary file can be removed, since we have already
     # reinserted all of its events
-    os.remove('alertEventsNotInserted.log')
-    log.userMessage.debug('alertEventsNotInserted.log removed.')
+    os.remove(PRIMARY_FILENAME)
+    log.userMessage.debug('Primary alert events log file removed.')
 
-    # When the alertEventsNotInserted.lock file is removed, other processes
+    # When the ALERT_EVENTS_LOCK file is removed, other processes
     # know that they have to  write back to the primary file, rather than
     # continuing to write to the temp file
-    os.remove('alertEventsNotInserted.lock')
-    log.userMessage.debug('alertEventsNotInserted lock released.')
+    os.remove(servicenow_conf.ALERT_EVENTS_LOCK)
+    log.userMessage.debug('ALERT_EVENTS_LOCK released.')
 
     log.userMessage.info('Waiting 10s for the completion of ongoing writes to \
-temp file (alertEventsNotInserted.temp)...')
+temp file...')
     time.sleep(10)
-    temp_file = open('alertEventsNotInserted.temp', 'r')
+    TEMP_FILENAME = log.logging_conf_dict['handlers'][
+        'alertEventsNotInsertedTempHandler']['filename']
+    temp_file = open(TEMP_FILENAME, 'r')
 
     # Copying temporary alert events to the primary file...
-    primary_file = open('alertEventsNotInserted.log', 'a')
+    primary_file = open(PRIMARY_FILENAME, 'a')
     for line in temp_file:
         primary_file.write(line)
     primary_file.close()
 
     temp_file.close()
-    os.remove('alertEventsNotInserted.temp')
-    log.userMessage.debug('alertEventsNotInserted.temp removed.')
+    os.remove(TEMP_FILENAME)
+    log.userMessage.debug('Temporary alert events log file removed.')
 
     # When the alertEventsReinsertion lock file is removed, other processes are
     # free to start another reinsertion
-    os.remove('alertEventsReinsertion.lock')
-    log.userMessage.debug('alertEventsReinsertion lock released.')
+    os.remove(servicenow_conf.ALERT_EVENTS_REINSERTION_LOCK)
+    log.userMessage.debug('ALERT_EVENTS_REINSERTION_LOCK released.')
 
 
 def handle_reinsert_incident():

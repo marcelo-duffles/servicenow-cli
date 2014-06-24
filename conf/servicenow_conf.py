@@ -1,4 +1,5 @@
 import socket
+import os
 
 # Service Now access configuration
 INSTANCE = "instance"
@@ -7,7 +8,7 @@ PASSWORD = "pass"
 
 # Events that match with the conditions below  will be ignored
 IGNORE_CI = {'operational_status': '3'}
-IGNORE_ALERT_EVENT = {'cmdb_ci': 'google'}
+IGNORE_ALERT_EVENT = {}
 
 # Debugging flag for SOAP API
 SOAP_API_DEBUG = False
@@ -30,3 +31,8 @@ def build_alert_event(parameters):
 
 # Using the same function above for building the incident
 build_incident = build_alert_event
+
+
+LOG_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/log'
+ALERT_EVENTS_LOCK = LOG_PATH + '/.alertEventsNotInserted.lock'
+ALERT_EVENTS_REINSERTION_LOCK = LOG_PATH + '/.alertEventsReinsertion.lock'
