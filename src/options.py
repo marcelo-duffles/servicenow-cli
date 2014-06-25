@@ -158,8 +158,8 @@ the primary file...')
         log.userMessage.debug("Alert event read from log file: %s %s" %
                               (originalTime, data))
         data['description'] = "Event originally generated at %s. \
-t hasn\'t been inserted earlier due to an error with Service Now \
-PI call." % originalTime
+It hasn\'t been inserted earlier due to an error with Service Now \
+API call." % originalTime
         try:
             response = soap_api.insert('u_alert_event', data)
             log.userMessage.info('Alert event reinserted: %s' % response)
