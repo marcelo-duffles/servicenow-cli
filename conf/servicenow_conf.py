@@ -19,13 +19,42 @@ HOSTNAME = socket.gethostname().split('.', 1)[0].upper()
 
 # Customize here your alert event
 def build_alert_event(parameters):
+    severity_map = {
+        'Clear': 'Normalizacao',
+        'Info': 'Informativo',
+        'Critical': 'Falha critica',
+        'Service Down': 'Falha de servico',
+        'Attention': 'Baixa',
+        'Trouble': 'Baixa',
+    }
+    opm_entity = parameters.split(';')[2]
+    opm_severity = parameters.split(';')[1]
+    severity = severity_map[opm_severity]
+    short_description = ''.join(parameters.split(';')[3:])
+    cmdb_ci = '.'.join(parameters.split(';')[0].split('.')[0:2]).upper()
+    management_mode = parameters.split(';')[0].split('.')[2].upper()
+
+    if opm_severity != 'Clear':
+        if management_mode != 'GT':
+            severity = 'Informativo'
+        elif ('ProcessMonitor' in opm_entity) or ('URL_Poll' in opm_entity):
+            severity = 'Falha de Servico'
+        elif '_Poll' in opm_entity:
+            severity = 'Falha critica'
+        elif ('CPU' in opm_entity) or ('MEM' in opm_entity) or \
+             ('RAM' in opm_entity) or \
+             ('Disk' in opm_entity) or ('Partition' in short_description) or \
+             ('IF_UTIL' in opm_entity):
+            severity = 'Capacidade'
+
     data = {
-        'cmdb_ci': '.'.join(parameters.split(';')[0].split('.')[0:2]),
-        'short_description': ''.join(parameters.split(';')[3:]),
+        'cmdb_ci': cmdb_ci,
+        'short_description': short_description,
         'u_monitoring_system': 'OpManager',
         'u_monitoring_server': 'ALOG.' + HOSTNAME,
-        'u_opm_severity': parameters.split(';')[1],
-        'u_opm_entity': parameters.split(';')[2],
+        'u_severity': severity,
+        'u_opm_severity': opm_severity,
+        'u_opm_entity': opm_entity,
     }
     return data
 
