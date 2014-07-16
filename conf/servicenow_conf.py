@@ -32,6 +32,7 @@ def build_alert_event(parameters):
     severity = severity_map[opm_severity]
     short_description = ''.join(parameters.split(';')[3:])
     cmdb_ci = '.'.join(parameters.split(';')[0].split('.')[0:2]).upper()
+    company = parameters.split(';')[0].split('.')[0].upper()
     management_mode = parameters.split(';')[0].split('.')[2].upper()
 
     if opm_severity != 'Clear':
@@ -49,6 +50,7 @@ def build_alert_event(parameters):
 
     data = {
         'cmdb_ci': cmdb_ci,
+        'company': company,
         'short_description': short_description,
         'u_monitoring_system': 'OpManager',
         'u_monitoring_server': 'ALOG.' + HOSTNAME,
