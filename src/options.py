@@ -39,17 +39,6 @@ configured filtering conditions." % ci_name)
     return True
 
 
-def filter_alert_event(event):
-    ''' returns False if the alert event is to be ignored '''
-
-    if (servicenow_conf.IGNORE_ALERT_EVENT is not None):
-        for k in servicenow_conf.IGNORE_ALERT_EVENT.keys():
-            if (servicenow_conf.IGNORE_ALERT_EVENT[k] in event[k]):
-                return False
-
-    return True
-
-
 def handle_get_incident(incident_number):
     data = {
         'number': incident_number
@@ -103,7 +92,8 @@ def handle_insert_incident(parameters):
 def handle_insert_alert_event(parameters):
     data = servicenow_conf.build_alert_event(parameters)
     log.userMessage.debug("Alert event built: %s" % data)
-    if (filter_alert_event(data) and filter_ci(data['cmdb_ci'])):
+    if (servicenow_conf.filter_alert_event(data) and \
+        filter_ci(data['cmdb_ci'])):
         try:
             response = soap_api.insert('u_alert_event', data)
             log.userMessage.info('Alert event inserted: %s' % response)

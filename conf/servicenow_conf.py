@@ -1,6 +1,7 @@
 import socket
 import os
 
+
 # Service Now access configuration
 INSTANCE = "instance"
 USERNAME = "user"
@@ -8,7 +9,6 @@ PASSWORD = "pass"
 
 # Events that match with the conditions below  will be ignored
 IGNORE_CI = {'operational_status': '3'}
-IGNORE_ALERT_EVENT = {}
 
 # Debugging flag for SOAP API
 SOAP_API_DEBUG = False
@@ -62,6 +62,16 @@ def build_alert_event(parameters):
 
 # Using the same function above for building the incident
 build_incident = build_alert_event
+
+
+# Customize here your function to filter alert events
+def filter_alert_event(event):
+    ''' returns False if the alert event is to be ignored '''
+
+    if (event['company'] != 'LOGIN'):
+        return False
+
+    return True
 
 
 LOG_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/log'
