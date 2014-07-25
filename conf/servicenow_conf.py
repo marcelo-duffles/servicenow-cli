@@ -36,7 +36,8 @@ def build_alert_event(parameters):
     management_mode = parameters.split(';')[0].split('.')[2].upper()
 
     if opm_severity != 'Clear':
-        if management_mode != 'GT':
+        if (management_mode != 'GT') and \
+           not (management_mode == 'HD' and company == 'LOGIN'):
             severity = 'Informativo'
         elif ('ProcessMonitor' in opm_entity) or ('URL_Poll' in opm_entity):
             severity = 'Falha de Servico'
