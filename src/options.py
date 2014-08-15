@@ -6,6 +6,7 @@ import os
 import traceback
 import json
 import time
+import logging
 from src import log, soap_api
 
 try:
@@ -160,6 +161,10 @@ Service Now: %s" % e)
             log.userMessage.debug(traceback.format_exc())
 
     primary_file.close()
+    for h in log.alertEventsNotInserted.handlers:
+        h.close()
+    for h in log.pastAlertEvents.handlers:
+        h.close()
 
     # At this point, the primary file can be removed, since we have already
     # reinserted all of its events
@@ -186,6 +191,10 @@ temp file...')
     primary_file.close()
 
     temp_file.close()
+    for h in log.alertEventsNotInsertedTemp.handlers:
+        h.close()
+    for h in log.pastAlertEventsTemp.handlers:
+        h.close()
     os.remove(TEMP_FILENAME)
     log.userMessage.debug('Temporary alert events log file removed.')
 
